@@ -505,23 +505,6 @@ def main():
             num_proc=data_args.preprocessing_num_workers,
         )
 
-        if "validation" not in dataset.keys():
-            dataset["validation"] = load_dataset(
-                data_args.dataset_name,
-                data_args.dataset_config_name,
-                split=f"train[:{data_args.validation_split_percentage}%]",
-                cache_dir=model_args.cache_dir,
-                token=model_args.token,
-                num_proc=data_args.preprocessing_num_workers,
-            )
-            dataset["train"] = load_dataset(
-                data_args.dataset_name,
-                data_args.dataset_config_name,
-                split=f"train[{data_args.validation_split_percentage}%:]",
-                cache_dir=model_args.cache_dir,
-                token=model_args.token,
-                num_proc=data_args.preprocessing_num_workers,
-            )
     else:
         data_files = {}
         dataset_args = {}
