@@ -25,7 +25,6 @@ import logging
 import os
 import sys
 from dataclasses import asdict, dataclass, field
-from multiprocess import set_start_method
 from enum import Enum
 from itertools import chain
 from pathlib import Path
@@ -548,7 +547,7 @@ def main():
             k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
             for k, t in concatenated_examples.items()
         }
-        return {k: np.array(v) for k, v in result.items}
+        return {k: np.array(v) for k, v in result.items()}
 
     # Note that with `batched=True`, this map processes 1,000 texts together, so group_texts throws away a remainder
     # for each of those groups of 1,000 texts. You can adjust that batch_size here but a higher value might be slower
@@ -567,5 +566,4 @@ def main():
 
 
 if __name__ == "__main__":
-    set_start_method("spawn")
     main()
