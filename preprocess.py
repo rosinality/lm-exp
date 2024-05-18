@@ -25,10 +25,12 @@ import logging
 import os
 import sys
 from dataclasses import asdict, dataclass, field
+from multiprocess import set_start_method
 from enum import Enum
 from itertools import chain
 from pathlib import Path
 from typing import Optional
+import numpy as np
 
 import datasets
 from datasets import load_dataset
@@ -511,6 +513,7 @@ def main():
         num_proc=data_args.preprocessing_num_workers,
         remove_columns=column_names,
         load_from_cache_file=not data_args.overwrite_cache,
+        new_fingerprint="tokenized",
     )
 
     if data_args.block_size is None:
@@ -543,8 +546,7 @@ def main():
             k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
             for k, t in concatenated_examples.items()
         }
-        result["labels"] = result["input_ids"].copy()
-        return result
+        return {k: np.array(v) for k, v in result.items}
 
     # Note that with `batched=True`, this map processes 1,000 texts together, so group_texts throws away a remainder
     # for each of those groups of 1,000 texts. You can adjust that batch_size here but a higher value might be slower
@@ -558,8 +560,10 @@ def main():
         batched=True,
         num_proc=data_args.preprocessing_num_workers,
         load_from_cache_file=not data_args.overwrite_cache,
+        new_fingerprint="grouped",
     )
 
 
 if __name__ == "__main__":
+    set_start_method("spawn")
     main()
