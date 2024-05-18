@@ -636,7 +636,7 @@ def main():
             )
         return output
 
-    tokenized_datasets = dataset.map(
+    """ tokenized_datasets = dataset.map(
         tokenize_function,
         batched=True,
         num_proc=data_args.preprocessing_num_workers,
@@ -645,7 +645,7 @@ def main():
         cache_file_names={
             "train": os.path.join(model_args.cache_dir, "tokenized.arrow")
         },
-    )
+    ) """
 
     if data_args.block_size is None:
         block_size = tokenizer.model_max_length
@@ -686,13 +686,15 @@ def main():
     # To speed up this part, we use multiprocessing. See the documentation of the map method for more information:
     # https://huggingface.co/docs/datasets/process#map
 
-    lm_datasets = tokenized_datasets.map(
+    """ lm_datasets = tokenized_datasets.map(
         group_texts,
         batched=True,
         num_proc=data_args.preprocessing_num_workers,
         load_from_cache_file=not data_args.overwrite_cache,
         cache_file_names={"train": os.path.join(model_args.cache_dir, "grouped.arrow")},
-    )
+    ) """
+    tokenized_datasets = dataset
+    lm_datasets = dataset
 
     if training_args.do_train:
         if "train" not in tokenized_datasets:

@@ -564,6 +564,8 @@ def main():
         cache_file_names={"train": os.path.join(model_args.cache_dir, "grouped.arrow")},
     )
 
+    lm_datasets.save_to_disk(os.path.join(model_args.cache_dir, "dataset"))
+
 
 if __name__ == "__main__":
     main()
