@@ -146,6 +146,8 @@ class TrainingArguments:
     hub_token: str = field(
         default=None, metadata={"help": "The token to use to push to the Model Hub."}
     )
+    exp_name: str = field(default=None, metadata={"help": "Name of experiment"})
+    bucket: str = field(default=None, metadata={"help": "GCP bucket name"})
 
     def __post_init__(self):
         if self.output_dir is not None:
@@ -711,7 +713,9 @@ def main():
         try:
             from flax.metrics.tensorboard import SummaryWriter
 
-            summary_writer = SummaryWriter(log_dir=Path(training_args.output_dir))
+            summary_writer = SummaryWriter(
+                log_dir=f"gs://{training_args.bucket}/lm-exp/{training_args.exp_name}"
+            )
         except ImportError as ie:
             has_tensorboard = False
             logger.warning(
