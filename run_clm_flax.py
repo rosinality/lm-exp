@@ -642,7 +642,9 @@ def main():
         num_proc=data_args.preprocessing_num_workers,
         remove_columns=column_names,
         load_from_cache_file=not data_args.overwrite_cache,
-        new_fingerprint="tokenized",
+        cache_file_names={
+            "train": os.path.join(model_args.cache_dir, "tokenized.arrow")
+        },
     )
 
     if data_args.block_size is None:
@@ -689,7 +691,7 @@ def main():
         batched=True,
         num_proc=data_args.preprocessing_num_workers,
         load_from_cache_file=not data_args.overwrite_cache,
-        new_fingerprint="grouped",
+        cache_file_names={"train": os.path.join(model_args.cache_dir, "grouped.arrow")},
     )
 
     if training_args.do_train:
