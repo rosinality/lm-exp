@@ -23,4 +23,4 @@ python run_clm_flax.py \
     --logging_steps=500 \
     --save_steps="10000000000000" \
     --eval_steps="10000000000000" \
-    --exp_name="$OPTIMIZER-$LR-$ARGS"
+    --exp_name="$OPTIMIZER-$LR-$WEIGHT_DECAY-$ARGS"
