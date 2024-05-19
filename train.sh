@@ -7,7 +7,7 @@ python run_clm_flax.py \
     --model_type="gpt2" \
     --config_name="./owm" \
     --tokenizer_name="./owm" \
-    --dataset_name="/mnt/disks/persist/dataset" \
+    --dataset_name="/mnt/disks/persist/lm-exp-dataset" \
     --cache_dir="/mnt/disks/persist" \
     --do_train \
     --block_size="1024" \
