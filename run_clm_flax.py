@@ -911,7 +911,7 @@ def main():
                     write_train_metric(
                         summary_writer, train_metrics, train_time, cur_step
                     )
-                    copytree(exp_name, "{model_args.cache_dir}/lm-exp/{exp_name}")
+                    copytree(exp_name, f"{model_args.cache_dir}/lm-exp/{exp_name}")
 
                 epochs.write(
                     f"Step... ({cur_step} | Loss: {train_metric['loss'].mean()}, Learning Rate:"
