@@ -20,5 +20,6 @@ pip install tensorflow-cpu tf-keras
 pip install -U jax[tpu] -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 pip install git+https://github.com/google-deepmind/optax
 pip install -U flax
+pip install gcsfs
 
 sed -i '270aforce_fp32_for_softmax=True,' openmoe_venv/lib/python3.10/site-packages/transformers/models/gpt2/modeling_flax_gpt2.py
