@@ -7,7 +7,7 @@ python run_clm_flax.py \
     --model_type="gpt2" \
     --config_name="./owm" \
     --tokenizer_name="./owm" \
-    --dataset_name="/home/rosinality/lm-exp-dataset" \
+    --dataset_name="/home/rosinality/bucket/lm-exp-dataset" \
     --cache_dir="/home/rosinality/bucket" \
     --do_train \
     --block_size="1024" \
