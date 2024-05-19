@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# sudo apt update
+sudo NEEDRESTART_MODE=a apt update -y
 sudo apt install -y python3.10-venv
 
 python3.10 -m venv openmoe_venv
