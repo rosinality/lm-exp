@@ -19,7 +19,7 @@ python run_clm_flax.py \
     $ARGS \
     --weight_decay=$WEIGHT_DECAY \
     --overwrite_output_dir \
-    --num_train_epochs="10" \
+    --num_train_epochs="2" \
     --logging_steps=500 \
     --save_steps="10000000000000" \
     --eval_steps="10000000000000" \
