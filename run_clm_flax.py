@@ -38,7 +38,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import optax
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_dataset, load_from_disk
 from flax import jax_utils, traverse_util
 from flax.jax_utils import pad_shard_unpad, unreplicate
 from flax.training import train_state
@@ -497,14 +497,7 @@ def main():
     # download the dataset.
     if data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
-        dataset = load_dataset(
-            data_args.dataset_name,
-            data_args.dataset_config_name,
-            cache_dir=model_args.cache_dir,
-            keep_in_memory=False,
-            token=model_args.token,
-            num_proc=data_args.preprocessing_num_workers,
-        )
+        dataset = load_from_disk(data_args.dataset_name)
 
     else:
         data_files = {}
@@ -717,8 +710,9 @@ def main():
         try:
             from flax.metrics.tensorboard import SummaryWriter
 
+            exp_name = training_args.exp_name.replace(" ", "")
             summary_writer = SummaryWriter(
-                log_dir=f"{model_args.cache_dir}/lm-exp/{training_args.exp_name}"
+                log_dir=f"{model_args.cache_dir}/lm-exp/{exp_name}"
             )
         except ImportError as ie:
             has_tensorboard = False
@@ -811,7 +805,8 @@ def main():
         shift_logits = logits[..., :-1, :]
         shift_labels = labels[..., 1:]
         loss = optax.softmax_cross_entropy(
-            shift_logits, onehot(shift_labels, shift_logits.shape[-1])
+            shift_logits.astype(jnp.float32),
+            onehot(shift_labels, shift_logits.shape[-1]),
         )
         return loss.mean()
 
