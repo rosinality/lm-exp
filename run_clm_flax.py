@@ -718,7 +718,7 @@ def main():
             from flax.metrics.tensorboard import SummaryWriter
 
             summary_writer = SummaryWriter(
-                log_dir=f"gs://{training_args.bucket}/lm-exp/{training_args.exp_name}"
+                log_dir=f"{model_args.cache_dir}/lm-exp/{training_args.exp_name}"
             )
         except ImportError as ie:
             has_tensorboard = False
