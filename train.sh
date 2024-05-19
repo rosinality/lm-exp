@@ -21,6 +21,6 @@ python run_clm_flax.py \
     --overwrite_output_dir \
     --num_train_epochs="10" \
     --logging_steps=500 \
-    --save_steps="10000" \
+    --save_steps="10000000000000" \
     --eval_steps="10000000000000" \
     --exp_name="$OPTIMIZER-$LR-$ARGS"
