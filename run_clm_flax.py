@@ -108,9 +108,8 @@ class TrainingArguments:
     adam_epsilon: float = field(
         default=1e-8, metadata={"help": "Epsilon for AdamW optimizer."}
     )
-    adafactor: bool = field(
-        default=False,
-        metadata={"help": "Whether or not to replace AdamW by Adafactor."},
+    optimizer: str = field(
+        default="adamw",
     )
     num_train_epochs: float = field(
         default=3.0, metadata={"help": "Total number of training epochs to perform."}
@@ -776,18 +775,26 @@ def main():
         return traverse_util.unflatten_dict(flat_mask)
 
     # create adam optimizer
-    if training_args.adafactor:
+    if training_args.optimizer == "adafactor":
         # We use the default parameters here to initialize adafactor,
         # For more details about the parameters please check https://github.com/deepmind/optax/blob/ed02befef9bf81cbbf236be3d2b0e032e9ed4a40/optax/_src/alias.py#L74
         optimizer = optax.adafactor(
             learning_rate=linear_decay_lr_schedule_fn,
         )
-    else:
+    elif training_args.optimizer == "adamw":
         optimizer = optax.adamw(
             learning_rate=linear_decay_lr_schedule_fn,
             b1=training_args.adam_beta1,
             b2=training_args.adam_beta2,
             eps=training_args.adam_epsilon,
+            weight_decay=training_args.weight_decay,
+            mask=decay_mask_fn,
+        )
+    elif training_args.optimizer == "sophia":
+        optimizer = optax.contrib.sophia(
+            learning_rate=linear_decay_lr_schedule_fn,
+            b1=training_args.adam_beta1,
+            b2=training_args.adam_beta2,
             weight_decay=training_args.weight_decay,
             mask=decay_mask_fn,
         )
