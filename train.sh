@@ -13,7 +13,7 @@ python run_clm_flax.py \
     --block_size="1024" \
     --per_device_train_batch_size=$BATCH_SIZE \
     --per_device_eval_batch_size="64" \
-    --learning_rate=$LR --warmup_steps="1000" \
+    --learning_rate=$LR --warmup_steps=$WARMUP \
     --optimizer=$OPTIMIZER \
     --dtype="bfloat16" \
     $ARGS \
