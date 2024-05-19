@@ -1,7 +1,11 @@
 #!/bin/bash
 
+export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.asc] https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.asc
+
 sudo NEEDRESTART_MODE=a apt update -y
-sudo apt install -y python3.10-venv
+sudo NEEDRESTART_MODE=a apt install -y python3.10-venv gcsfuse
 
 python3.10 -m venv openmoe_venv
 

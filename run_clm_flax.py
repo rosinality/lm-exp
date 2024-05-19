@@ -27,6 +27,7 @@ import math
 import os
 import sys
 import time
+import shutil
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from itertools import chain
@@ -421,6 +422,19 @@ def create_learning_rate_fn(
     return schedule_fn
 
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
@@ -711,9 +725,7 @@ def main():
             from flax.metrics.tensorboard import SummaryWriter
 
             exp_name = training_args.exp_name.replace(" ", "")
-            summary_writer = SummaryWriter(
-                log_dir=f"{model_args.cache_dir}/lm-exp/{exp_name}"
-            )
+            summary_writer = SummaryWriter(log_dir=exp_name)
         except ImportError as ie:
             has_tensorboard = False
             logger.warning(
@@ -899,6 +911,7 @@ def main():
                     write_train_metric(
                         summary_writer, train_metrics, train_time, cur_step
                     )
+                    copytree(exp_name, "{model_args.cache_dir}/lm-exp/{exp_name}")
 
                 epochs.write(
                     f"Step... ({cur_step} | Loss: {train_metric['loss'].mean()}, Learning Rate:"
