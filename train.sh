@@ -17,7 +17,7 @@ python run_clm_flax.py \
     --optimizer=$OPTIMIZER \
     --dtype="bfloat16" \
     $ARGS \
-    --weight_decay="0.01" \
+    --weight_decay=$WEIGHT_DECAY \
     --overwrite_output_dir \
     --num_train_epochs="10" \
     --logging_steps=500 \
