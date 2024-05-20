@@ -97,6 +97,9 @@ class TrainingArguments:
     learning_rate: float = field(
         default=5e-5, metadata={"help": "The initial learning rate for AdamW."}
     )
+    gradient_accumulation: int = field(
+        default=1, metadata={"help": "number of gradient accumulation"}
+    )
     weight_decay: float = field(
         default=0.0, metadata={"help": "Weight decay for AdamW if we apply some."}
     )
@@ -805,6 +808,11 @@ def main():
             weight_decay=training_args.weight_decay,
             mask=decay_mask_fn,
         )
+
+    optimizer = optax.chain(optax.clip_by_global_norm(1), optimizer)
+    optimizer = optax.MultiSteps(
+        optimizer, every_k_schedule=training_args.gradient_accumulation
+    )
 
     # Setup train state
     state = TrainState.create(
