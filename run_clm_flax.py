@@ -781,7 +781,7 @@ def main():
             path: (path[-1] != "bias" and path[-2:] not in layer_norm_named_params)
             for path in flat_params
         }
-        print(flat_mask)
+
         return traverse_util.unflatten_dict(flat_mask)
 
     # create adam optimizer
