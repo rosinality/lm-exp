@@ -781,6 +781,7 @@ def main():
             path: (path[-1] != "bias" and path[-2:] not in layer_norm_named_params)
             for path in flat_params
         }
+        print(flat_mask)
         return traverse_util.unflatten_dict(flat_mask)
 
     # create adam optimizer
@@ -851,7 +852,7 @@ def main():
 
         metrics = {
             "loss": loss,
-            "learning_rate": linear_decay_lr_schedule_fn(state.step),
+            "learning_rate": linear_decay_lr_schedule_fn(state.opt_state.gradient_step),
         }
         metrics = jax.lax.pmean(metrics, axis_name="batch")
 
