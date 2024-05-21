@@ -61,6 +61,7 @@ from transformers import (
 from transformers.testing_utils import CaptureLogger
 from transformers.utils import send_example_telemetry
 
+from sonew import sonew
 
 logger = logging.getLogger(__name__)
 
@@ -806,6 +807,14 @@ def main():
             b1=training_args.adam_beta1,
             b2=training_args.adam_beta2,
             batch_size=train_batch_size,
+            weight_decay=training_args.weight_decay,
+            mask=decay_mask_fn,
+        )
+    elif training_args.optimizer == "sonew":
+        optimizer = optax.contrib.sophia(
+            learning_rate=linear_decay_lr_schedule_fn,
+            beta1=training_args.adam_beta1,
+            beta2=training_args.adam_beta2,
             weight_decay=training_args.weight_decay,
             mask=decay_mask_fn,
         )
