@@ -303,8 +303,8 @@ class FlaxGPT2Attention(nn.Module):
 
         # usual dot product attention
         attn_weights = dot_product_attention_weights(
-            query,
-            key / float(self.layer_id + 1),
+            query / float(self.layer_id + 1),
+            key,
             bias=attention_bias,
             dropout_rng=dropout_rng,
             dropout_rate=self.config.attn_pdrop,
