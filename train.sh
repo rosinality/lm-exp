@@ -3,10 +3,10 @@
 source openmoe_venv/bin/activate
 
 python run_clm_flax.py \
-    --output_dir="./owm" \
+    --output_dir="./gpt2-$ARCH" \
     --model_type="gpt2" \
-    --config_name="./owm" \
-    --tokenizer_name="./owm" \
+    --config_name="./gpt2-$ARCH" \
+    --tokenizer_name="./gpt2-$ARCH" \
     --dataset_name="/home/rosinality/algebraic-stack" \
     --cache_dir="/home/rosinality/bucket" \
     --do_train \
@@ -23,4 +23,4 @@ python run_clm_flax.py \
     --logging_steps=500 \
     --save_steps="10000000000000" \
     --eval_steps="10000000000000" \
-    --exp_name="$OPTIMIZER-$LR-$WEIGHT_DECAY-$ARGS"
+    --exp_name="$ARCH-$OPTIMIZER-$LR-$ARGS"
