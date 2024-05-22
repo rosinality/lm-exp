@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from typing import Any, Optional, Tuple
+import math
 
 import flax.linen as nn
 import jax
@@ -117,16 +118,17 @@ GPT2_INPUTS_DOCSTRING = r"""
 
 class FlaxConv1D(nn.Module):
     features: int
-    use_bias: bool = True
+    use_bias: bool = False
     dtype: Any = jnp.float32
     precision: Any = None
+    stddev: float = 0.02
 
     @nn.compact
     def __call__(self, inputs):
         inputs = jnp.asarray(inputs, self.dtype)
         kernel = self.param(
             "kernel",
-            jax.nn.initializers.normal(stddev=0.02),
+            jax.nn.initializers.normal(stddev=self.stddev),
             (self.features, inputs.shape[-1]),
         )
         kernel = jnp.asarray(kernel.transpose(), self.dtype)
@@ -148,6 +150,7 @@ class FlaxGPT2Attention(nn.Module):
     dtype: jnp.dtype = jnp.float32
     causal: bool = True
     is_cross_attention: bool = False
+    layer_id: int = 0
 
     def setup(self):
         config = self.config
@@ -160,7 +163,11 @@ class FlaxGPT2Attention(nn.Module):
             self.q_attn = FlaxConv1D(self.embed_dim, dtype=self.dtype)
         else:
             self.c_attn = FlaxConv1D(3 * self.embed_dim, dtype=self.dtype)
-        self.c_proj = FlaxConv1D(self.embed_dim, dtype=self.dtype)
+        self.c_proj = FlaxConv1D(
+            self.embed_dim,
+            dtype=self.dtype,
+            stddev=0.02 / math.sqrt(2 * config.n_layer),
+        )
 
         self.resid_dropout = nn.Dropout(rate=config.resid_pdrop)
 
@@ -297,7 +304,7 @@ class FlaxGPT2Attention(nn.Module):
         # usual dot product attention
         attn_weights = dot_product_attention_weights(
             query,
-            key,
+            key / float(self.layer_id + 1),
             bias=attention_bias,
             dropout_rng=dropout_rng,
             dropout_rate=self.config.attn_pdrop,
@@ -324,7 +331,11 @@ class FlaxGPT2MLP(nn.Module):
     def setup(self):
         embed_dim = self.config.hidden_size
         self.c_fc = FlaxConv1D(self.intermediate_size, dtype=self.dtype)
-        self.c_proj = FlaxConv1D(embed_dim, dtype=self.dtype)
+        self.c_proj = FlaxConv1D(
+            embed_dim,
+            dtype=self.dtype,
+            stddev=0.02 / math.sqrt(2 * self.config.n_layer),
+        )
         self.act = ACT2FN[self.config.activation_function]
         self.dropout = nn.Dropout(rate=self.config.resid_pdrop)
 
@@ -339,6 +350,7 @@ class FlaxGPT2MLP(nn.Module):
 class FlaxGPT2Block(nn.Module):
     config: GPT2Config
     dtype: jnp.dtype = jnp.float32
+    layer_id: int = 0
 
     def setup(self):
         hidden_size = self.config.hidden_size
@@ -349,7 +361,9 @@ class FlaxGPT2Block(nn.Module):
         self.ln_1 = nn.LayerNorm(
             epsilon=self.config.layer_norm_epsilon, dtype=self.dtype
         )
-        self.attn = FlaxGPT2Attention(self.config, dtype=self.dtype)
+        self.attn = FlaxGPT2Attention(
+            self.config, dtype=self.dtype, layer_id=self.layer_id
+        )
         self.ln_2 = nn.LayerNorm(
             epsilon=self.config.layer_norm_epsilon, dtype=self.dtype
         )
@@ -621,7 +635,7 @@ class FlaxGPT2BlockCollection(nn.Module):
 
     def setup(self):
         self.blocks = [
-            FlaxGPT2Block(self.config, name=str(i), dtype=self.dtype)
+            FlaxGPT2Block(self.config, name=str(i), dtype=self.dtype, layer_id=i)
             for i in range(self.config.num_hidden_layers)
         ]
 
