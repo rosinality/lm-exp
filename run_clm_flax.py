@@ -806,7 +806,9 @@ def main():
             learning_rate=linear_decay_lr_schedule_fn,
             b1=training_args.adam_beta1,
             b2=training_args.adam_beta2,
-            batch_size=train_batch_size,
+            batch_size=train_batch_size
+            * training_args.gradient_accumulation
+            * block_size,
             weight_decay=training_args.weight_decay,
             mask=decay_mask_fn,
         )
