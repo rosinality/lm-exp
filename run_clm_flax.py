@@ -835,8 +835,9 @@ def main():
     def loss_fn(logits, labels):
         shift_logits = logits[..., :-1, :]
         shift_labels = labels[..., 1:]
-        loss = optax.softmax_cross_entropy_with_integer_labels(
-            jnp.asarray(shift_logits, dtype=jnp.float32), shift_labels
+        loss = optax.softmax_cross_entropy(
+            shift_logits.astype(jnp.float32),
+            onehot(shift_labels, shift_logits.shape[-1]),
         )
         return loss.mean()
 

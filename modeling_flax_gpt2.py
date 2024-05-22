@@ -118,7 +118,7 @@ GPT2_INPUTS_DOCSTRING = r"""
 
 class FlaxConv1D(nn.Module):
     features: int
-    use_bias: bool = False
+    use_bias: bool = True
     dtype: Any = jnp.float32
     precision: Any = None
     stddev: float = 0.02
@@ -150,7 +150,6 @@ class FlaxGPT2Attention(nn.Module):
     dtype: jnp.dtype = jnp.float32
     causal: bool = True
     is_cross_attention: bool = False
-    layer_id: int = 0
 
     def setup(self):
         config = self.config
@@ -303,18 +302,20 @@ class FlaxGPT2Attention(nn.Module):
 
         # usual dot product attention
         attn_weights = dot_product_attention_weights(
-            query / float(self.layer_id + 1),
+            query,
             key,
             bias=attention_bias,
             dropout_rng=dropout_rng,
             dropout_rate=self.config.attn_pdrop,
             deterministic=deterministic,
-            dtype=self.dtype,
+            dtype=jnp.float32,
             precision=None,
             force_fp32_for_softmax=True,
         )
 
-        attn_output = jnp.einsum("...hqk,...khd->...qhd", attn_weights, value)
+        attn_output = jnp.einsum("...hqk,...khd->...qhd", attn_weights, value).astype(
+            self.dtype
+        )
         attn_output = self._merge_heads(attn_output)
         attn_output = self.c_proj(attn_output)
         attn_output = self.resid_dropout(attn_output, deterministic=deterministic)
@@ -350,7 +351,6 @@ class FlaxGPT2MLP(nn.Module):
 class FlaxGPT2Block(nn.Module):
     config: GPT2Config
     dtype: jnp.dtype = jnp.float32
-    layer_id: int = 0
 
     def setup(self):
         hidden_size = self.config.hidden_size
@@ -361,9 +361,7 @@ class FlaxGPT2Block(nn.Module):
         self.ln_1 = nn.LayerNorm(
             epsilon=self.config.layer_norm_epsilon, dtype=self.dtype
         )
-        self.attn = FlaxGPT2Attention(
-            self.config, dtype=self.dtype, layer_id=self.layer_id
-        )
+        self.attn = FlaxGPT2Attention(self.config, dtype=self.dtype)
         self.ln_2 = nn.LayerNorm(
             epsilon=self.config.layer_norm_epsilon, dtype=self.dtype
         )
@@ -635,7 +633,7 @@ class FlaxGPT2BlockCollection(nn.Module):
 
     def setup(self):
         self.blocks = [
-            FlaxGPT2Block(self.config, name=str(i), dtype=self.dtype, layer_id=i)
+            FlaxGPT2Block(self.config, name=str(i), dtype=self.dtype)
             for i in range(self.config.num_hidden_layers)
         ]
 
