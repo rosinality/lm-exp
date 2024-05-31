@@ -408,11 +408,12 @@ def create_learning_rate_fn(
     num_train_epochs: int,
     num_warmup_steps: int,
     learning_rate: float,
+    gradient_accumulation
 ) -> Callable[[int], jnp.ndarray]:
     """Returns a linear warmup, linear_decay learning rate function."""
     steps_per_epoch = train_ds_size // train_batch_size
     # num_train_steps = steps_per_epoch * num_train_epochs
-    num_train_steps = 50000
+    num_train_steps = 50000 // gradient_accumulation
     warmup_fn = optax.linear_schedule(
         init_value=0.0, end_value=learning_rate, transition_steps=num_warmup_steps
     )
@@ -763,6 +764,7 @@ def main():
         training_args.num_train_epochs,
         training_args.warmup_steps,
         training_args.learning_rate,
+        training_args.gradient_accumulation
     )
 
     # We use Optax's "masking" functionality to not apply weight decay
