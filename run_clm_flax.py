@@ -411,7 +411,8 @@ def create_learning_rate_fn(
 ) -> Callable[[int], jnp.ndarray]:
     """Returns a linear warmup, linear_decay learning rate function."""
     steps_per_epoch = train_ds_size // train_batch_size
-    num_train_steps = steps_per_epoch * num_train_epochs
+    # num_train_steps = steps_per_epoch * num_train_epochs
+    num_train_steps = 50000
     warmup_fn = optax.linear_schedule(
         init_value=0.0, end_value=learning_rate, transition_steps=num_warmup_steps
     )
@@ -912,7 +913,8 @@ def main():
         train_loader = data_loader(
             input_rng, train_dataset, train_batch_size, shuffle=True
         )
-        steps_per_epoch = len(train_dataset) // train_batch_size
+        # steps_per_epoch = len(train_dataset) // train_batch_size
+        steps_per_epoch = 50000
         # train
         for step in tqdm(
             range(steps_per_epoch), desc="Training...", position=1, leave=False
